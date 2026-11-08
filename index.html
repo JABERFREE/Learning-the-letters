@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <script>
+(function(ntb){
+var d = document,
+    s = d.createElement('script'),
+    l = d.currentScript || d.scripts[d.scripts.length - 1];
+s.settings = ntb || {};
+s.src = "\/\/embellishedcoffee.com\/bBX.VesJdoGUlQ0LYRWscB\/ke\/mS9\/u_Z\/UklLkRP\/TUc\/2CMnDhMI3AOXTPMCtlNiz\/YSw\/MEz\/cW5_NQwu";
+s.async = true;
+s.referrerPolicy = 'no-referrer-when-downgrade';
+l.parentNode.insertBefore(s, l);
+})({})
+</script>
+  <title>اجمع اللوحات والكلمات - NEXAPP</title>
+  <style>
+    :root {
+      --bg-color: #060810;
+      --neon-cyan: #00f3ff;
+      --neon-pink: #ff007f;
+      --neon-green: #39ff14;
+      --neon-yellow: #ffe600;
+      --neon-purple: #b026ff;
+      --panel-bg: rgba(15, 22, 38, 0.92);
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+      touch-action: manipulation;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-color);
+      color: #ffffff;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      direction: rtl;
+    }
+
+    /* خلفية الجسيمات */
+    #bg-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* حاوية اللعبة للهواتف الذكية - مع ضبط الارتفاع والهامش العلوي للإعلان */
+    .app-container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 480px;
+      height: calc(100% - 90px);
+      margin: 90px auto 0 auto; /* ترك 90px في الأعلى للإعلان */
+      padding: 4px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    /* الشريط العلوي */
+    header {
+      background: var(--panel-bg);
+      border: 1px solid rgba(0, 243, 255, 0.4);
+      border-radius: 12px;
+      padding: 6px 12px;
+      box-shadow: 0 0 12px rgba(0, 243, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .level-badge {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px var(--neon-cyan);
+    }
+
+    .category-badge {
+      color: var(--neon-pink);
+      background: rgba(255, 0, 127, 0.15);
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid var(--neon-pink);
+      font-size: 0.75rem;
+    }
+
+    .score-badge {
+      color: var(--neon-yellow);
+      text-shadow: 0 0 8px var(--neon-yellow);
+    }
+
+    .timer-track {
+      width: 100%;
+      height: 6px;
+      background: #090e18;
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid var(--neon-pink);
+    }
+
+    .timer-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-green), var(--neon-yellow), var(--neon-pink));
+      transition: width 0.1s linear;
+    }
+
+    /* 2. منطقة اللوحة المربعة العلوية */
+    .painting-section {
+      flex: 1.2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+    }
+
+    .square-frame {
+      width: 160px;
+      height: 160px;
+      background: linear-gradient(180deg, #0a0f1d 0%, #12192c 100%);
+      border: 3px solid var(--neon-cyan);
+      border-radius: 18px;
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.3), inset 0 0 15px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+
+    .square-frame.completed {
+      border-color: var(--neon-green) !important;
+      box-shadow: 0 0 35px var(--neon-green), inset 0 0 20px rgba(57, 255, 20, 0.4) !important;
+      transform: scale(1.05);
+    }
+
+    .item-icon {
+      font-size: 3.5rem;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+      transition: all 0.3s ease;
+    }
+
+    .item-word-display {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--neon-green);
+      text-shadow: 0 0 10px var(--neon-green);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+    }
+
+    .square-frame.completed .item-word-display {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .placeholder-hint {
+      font-size: 0.7rem;
+      color: #6a7b9c;
+      text-align: center;
+    }
+
+    /* 3. المنطقة الوسطى (الشكل المطلوب + خانات الأحرف المجمعة) */
+    .middle-control-zone {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .target-banner {
+      background: rgba(0, 243, 255, 0.12);
+      border: 1px solid var(--neon-cyan);
+      border-radius: 8px;
+      padding: 4px 8px;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--neon-yellow);
+      box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+    }
+
+    /* خانات الكلمة التي يتم تجميعها */
+    .word-slots-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      min-height: 42px;
+      background: rgba(10, 15, 26, 0.85);
+      border: 1px dashed var(--neon-green);
+      border-radius: 10px;
+      padding: 4px;
+    }
+
+    .letter-slot {
+      width: 34px;
+      height: 38px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--neon-cyan);
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+      transition: all 0.2s;
+    }
+
+    .letter-slot.filled {
+      border-color: var(--neon-green);
+      background: rgba(57, 255, 20, 0.15);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+      animation: pop 0.2s ease;
+    }
+
+    .btn-undo {
+      background: rgba(255, 0, 127, 0.2);
+      border: 1px solid var(--neon-pink);
+      color: var(--neon-pink);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* 4. المنطقة السفلية (شبكة الأحرف المبعثرة) مع حماية حواف الشاشة والسفلية */
+    .bottom-letters-zone {
+      background: var(--panel-bg);
+      border: 1px solid rgba(255, 0, 127, 0.3);
+      border-radius: 12px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+
+    .zone-title {
+      font-size: 0.7rem;
+      color: #aaa;
+      text-align: center;
+    }
+
+    .letters-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+    }
+
+    .letter-btn {
+      aspect-ratio: 1 / 1;
+      background: #111827;
+      border: 1.5px solid #2a364f;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #ffffff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 3px 0 #0b101b;
+    }
+
+    .letter-btn:active {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+
+    .letter-btn.disabled {
+      opacity: 0.25;
+      pointer-events: none;
+      border-color: #1a2333;
+    }
+
+    .letter-btn.wrong {
+      border-color: #ff0055;
+      background: rgba(255, 0, 85, 0.3);
+      animation: shake 0.3s ease;
+    }
+
+    /* الشاشات التفاعلية */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(4, 6, 12, 0.94);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-card {
+      background: #0f172a;
+      border: 2px solid var(--neon-cyan);
+      border-radius: 18px;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 0 35px var(--neon-cyan);
+      max-width: 380px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .modal-card h1 {
+      font-size: 1.7rem;
+      color: #fff;
+      text-shadow: 0 0 12px var(--neon-cyan);
+    }
+
+    .designer-tag {
+      font-size: 0.85rem;
+      color: var(--neon-pink);
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px var(--neon-pink);
+    }
+
+    .btn-action {
+      background: transparent;
+      color: var(--neon-cyan);
+      border: 2px solid var(--neon-cyan);
+      padding: 10px 24px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 12px var(--neon-cyan);
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn-action:hover, .btn-action:active {
+      background: var(--neon-cyan);
+      color: #000;
+      box-shadow: 0 0 25px var(--neon-cyan);
+    }
+
+    .hidden { display: none !important; }
+
+    @keyframes pop {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- خلفية الجسيمات -->
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="app-container">
+
+    <!-- الشريط العلوي -->
+    <header>
+      <div class="top-bar">
+        <span class="level-badge" id="level-badge">اللوحة 1 / 1000</span>
+        <span class="category-badge" id="category-badge">فواكه</span>
+        <span class="score-badge">النقاط: <span id="score">0</span></span>
+      </div>
+      <div class="timer-track">
+        <div class="timer-fill" id="timer-fill"></div>
+      </div>
+    </header>
+
+    <!-- 2. منطقة اللوحة المربعة العلوية -->
+    <section class="painting-section">
+      <div class="square-frame" id="square-frame">
+        <div class="item-icon" id="item-icon">❓</div>
+        <div class="item-word-display" id="item-word-display">تفاحة</div>
+        <div class="placeholder-hint" id="placeholder-hint">اجمع أحرف الكلمة لتظهر اللوحة مكتملة!</div>
+      </div>
+    </section>
+
+    <!-- 3. المنطقة الوسطى (الشكل المطلوب + خانات الأحرف المجمعة) -->
+    <section class="middle-control-zone">
+      <div class="target-banner" id="target-banner">
+        🎯 اجمع كلمة الشكل المطلوب: <span id="target-hint-text">...</span>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+        <div class="word-slots-container" id="word-slots-container">
+          <!-- تُولد خانات الكلمة هنا -->
+        </div>
+        <button class="btn-undo" onclick="resetCurrentWord()">تراجع ↩️</button>
+      </div>
+    </section>
+
+    <!-- 4. المنطقة السفلية (شبكة الأحرف المبعثرة) -->
+    <section class="bottom-letters-zone">
+      <div class="zone-title">اختر الأحرف بالترتيب الصحيح لتكوين الكلمة:</div>
+      <div class="letters-grid" id="letters-grid">
+        <!-- تُولد أزرار الأحرف هنا -->
+      </div>
+    </section>
+
+  </div>
+
+  <!-- شاشة البداية -->
+  <div class="modal-overlay" id="intro-modal">
+    <div class="modal-card">
+      <h1>اجمع اللوحات والكلمات 🎨</h1>
+      <div class="designer-tag">تصميم وتطوير: NEXAPP</div>
+      <p style="font-size: 0.9rem; color: #ccc; line-height: 1.5;">
+        طابق الأحرف العربية المبعثرة لتجميع اسم الكائن المطلوب، وشاهد اللوحة تنبض بالحياة داخل الإطار المربع قبل انقضاء الـ 25 ثانية!
+      </p>
+      <button class="btn-action" onclick="startGame()">ابدأ اللعب 🚀</button>
+    </div>
+  </div>
+
+  <!-- شاشة النتيجة -->
+  <div class="modal-overlay hidden" id="result-modal">
+    <div class="modal-card">
+      <h1 id="result-title">اكتملت اللوحة! 🎉</h1>
+      <p id="result-desc" style="font-size: 1.1rem; color: #fff;">مجموع نقاطك: 0</p>
+      <button class="btn-action" onclick="nextLevel()">المستوى التالي ⏩</button>
+    </div>
+  </div>
+
+  <script>
+    const MAX_TIME = 25; // ضبط التوقيت إلى 25 ثانية لكل مستوى
+
+    // محرك خلفية النيون
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.5;
+        this.speedY = (Math.random() - 0.5) * 0.5;
+        this.color = ['#00f3ff', '#ff007f', '#39ff14', '#ffe600'][Math.floor(Math.random() * 4)];
+      }
+      update() {
+        this.x += this.speedX; this.y += this.speedY;
+        if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset();
+      }
+      draw() {
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+    for(let i=0; i<25; i++) particles.push(new Particle());
+    function anim() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(anim);
+    }
+    anim();
+
+    // الصوت التخليقي
+    let audioCtx = null;
+    function playSound(freq, type='sine', duration=0.15) {
+      if(!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e){}
+    }
+
+    // موسوعة البيانات الشاملة الموزعة حسب التصنيفات
+    const GAME_CATEGORIES = [
+      {
+        name: "فواكه 🍎",
+        items: [
+          { word: "تفاحة", icon: "🍎" },
+          { word: "موزة", icon: "🍌" },
+          { word: "برتقال", icon: "🍊" },
+          { word: "عنب", icon: "🍇" },
+          { word: "بطيخ", icon: "🍉" },
+          { word: "فراولة", icon: "🍓" },
+          { word: "كرز", icon: "🍒" },
+          { word: "رمان", icon: "🫒" },
+          { word: "أناناس", icon: "🍍" },
+          { word: "كيوي", icon: "🥝" },
+          { word: "ليمون", icon: "🍋" },
+          { word: "خوخ", icon: "🍑" },
+          { word: "كمثرى", icon: "🍐" }
+        ]
+      },
+      {
+        name: "خضار 🥦",
+        items: [
+          { word: "جزر", icon: "🥕" },
+          { word: "طماطم", icon: "🍅" },
+          { word: "خيار", icon: "🥒" },
+          { word: "باذنجان", icon: "🍆" },
+          { word: "بطاطس", icon: "🥔" },
+          { word: "بصل", icon: "🧅" },
+          { word: "ثوم", icon: "🧄" },
+          { word: "فلفل", icon: "🫑" },
+          { word: "ذرة", icon: "🌽" },
+          { word: "بروكلي", icon: "🥦" },
+          { word: "قرع", icon: "🎃" }
+        ]
+      },
+      {
+        name: "حيوانات 🦁",
+        items: [
+          { word: "أسد", icon: "🦁" },
+          { word: "نمر", icon: "🐅" },
+          { word: "فيل", icon: "🐘" },
+          { word: "زرافة", icon: "🦒" },
+          { word: "حصان", icon: "🐎" },
+          { word: "جمل", icon: "🐪" },
+          { word: "ثعلب", icon: "🦊" },
+          { word: "أرنب", icon: "🐰" },
+          { word: "غزال", icon: "🦌" },
+          { word: "قرد", icon: "🐒" },
+          { word: "دب", icon: "🐻" },
+          { word: "فهد", icon: "🐆" }
+        ]
+      },
+      {
+        name: "كائنات بحرية 🌊",
+        items: [
+          { word: "قرش", icon: "🦈" },
+          { word: "دلفين", icon: "🐬" },
+          { word: "أخطبوط", icon: "🐙" },
+          { word: "حوت", icon: "🐳" },
+          { word: "قنديل", icon: "🪼" },
+          { word: "سرطان", icon: "🦀" },
+          { word: "بطريق", icon: "🐧" },
+          { word: "جمبري", icon: "🦐" },
+          { word: "صدفة", icon: "🐚" },
+          { word: "مرجان", icon: "🪸" }
+        ]
+      },
+      {
+        name: "معدات وأدوات 🛠️",
+        items: [
+          { word: "مطرقة", icon: "🔨" },
+          { word: "مفك", icon: "🪛" },
+          { word: "منشار", icon: "🪚" },
+          { word: "مقص", icon: "✂️" },
+          { word: "سلم", icon: "🪜" },
+          { word: "ميزان", icon: "⚖️" },
+          { word: "بوصلة", icon: "🧭" },
+          { word: "فرشاة", icon: "🖌️" },
+          { word: "مفتاح", icon: "🔑" },
+          { word: "فأس", icon: "🪓" }
+        ]
+      },
+      {
+        name: "آلات وأجهزة 🚗",
+        items: [
+          { word: "سيارة", icon: "🚗" },
+          { word: "طائرة", icon: "✈️" },
+          { word: "قطار", icon: "🚆" },
+          { word: "حاسوب", icon: "💻" },
+          { word: "غسالة", icon: "🧺" },
+          { word: "تلفاز", icon: "📺" },
+          { word: "هاتف", icon: "📱" },
+          { word: "مروحة", icon: "🪭" },
+          { word: "شاحنة", icon: "🚛" },
+          { word: "صواريخ", icon: "🚀" }
+        ]
+      },
+      {
+        name: "عناصر من حياتنا 🌍",
+        items: [
+          { word: "شمس", icon: "☀️" },
+          { word: "قمر", icon: "🌙" },
+          { word: "نجمة", icon: "⭐" },
+          { word: "سحابة", icon: "☁️" },
+          { word: "جبل", icon: "⛰️" },
+          { word: "كتاب", icon: "📖" },
+          { word: "قلم", icon: "✏️" },
+          { word: "ساعة", icon: "⌚" },
+          { word: "نظارة", icon: "👓" },
+          { word: "حذاء", icon: "👟" }
+        ]
+      }
+    ];
+
+    const EXTRA_LETTERS = ['ب', 'س', 'م', 'ك', 'ر', 'ل', 'ع', 'ن', 'ت', 'د', 'ف', 'ح'];
+
+    function getLevelItem(lvl) {
+      const catIdx = Math.floor((lvl - 1) / 10) % GAME_CATEGORIES.length;
+      const category = GAME_CATEGORIES[catIdx];
+      const itemIdx = (lvl - 1) % category.items.length;
+      const item = category.items[itemIdx];
+
+      return {
+        categoryName: category.name,
+        word: item.word,
+        icon: item.icon,
+        letters: item.word.split('')
+      };
+    }
+
+    // متغيرات اللعبة
+    let currentLevel = 1;
+    let score = 0;
+    let timeLeft = MAX_TIME;
+    let timerInterval = null;
+    let lastPlayedSecond = MAX_TIME;
+    let currentLevelData = null;
+    let assembledLetters = [];
+
+    // عناصر الواجهة
+    const levelBadge = document.getElementById('level-badge');
+    const categoryBadge = document.getElementById('category-badge');
+    const scoreEl = document.getElementById('score');
+    const timerFill = document.getElementById('timer-fill');
+    const squareFrame = document.getElementById('square-frame');
+    const itemIcon = document.getElementById('item-icon');
+    const itemWordDisplay = document.getElementById('item-word-display');
+    const placeholderHint = document.getElementById('placeholder-hint');
+    const targetHintText = document.getElementById('target-hint-text');
+    const wordSlotsContainer = document.getElementById('word-slots-container');
+    const lettersGrid = document.getElementById('letters-grid');
+    const resultModal = document.getElementById('result-modal');
+
+    function startGame() {
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      document.getElementById('intro-modal').classList.add('hidden');
+      loadLevel(currentLevel);
+    }
+
+    function loadLevel(lvl) {
+      currentLevel = lvl;
+      currentLevelData = getLevelItem(lvl);
+      timeLeft = MAX_TIME;
+      lastPlayedSecond = MAX_TIME;
+      assembledLetters = [];
+
+      levelBadge.textContent = `اللوحة ${lvl} / 1000`;
+      categoryBadge.textContent = currentLevelData.categoryName;
+      scoreEl.textContent = score;
+
+      squareFrame.classList.remove('completed');
+      itemIcon.textContent = currentLevelData.icon;
+      itemWordDisplay.textContent = currentLevelData.word;
+      placeholderHint.style.display = 'block';
+
+      targetHintText.textContent = `${currentLevelData.icon} (${currentLevelData.categoryName})`;
+
+      renderWordSlots();
+      renderLettersGrid();
+
+      clearInterval(timerInterval);
+      timerFill.style.width = '100%';
+      timerInterval = setInterval(updateTimer, 100);
+    }
+
+    function updateTimer() {
+      timeLeft -= 0.1;
+      const pct = Math.max(0, (timeLeft / MAX_TIME) * 100);
+      timerFill.style.width = pct + '%';
+
+      const currentSecond = Math.ceil(timeLeft);
+      if(currentSecond !== lastPlayedSecond && currentSecond >= 0) {
+        lastPlayedSecond = currentSecond;
+        if(currentSecond <= 5) {
+          playSound(1000, 'square', 0.08);
+        } else {
+          playSound(600, 'sine', 0.04);
+        }
+      }
+
+      if(timeLeft <= 0) {
+        endGame(false);
+      }
+    }
+
+    function renderWordSlots() {
+      wordSlotsContainer.innerHTML = '';
+      for(let i=0; i<currentLevelData.letters.length; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'letter-slot';
+        if(assembledLetters[i]) {
+          slot.classList.add('filled');
+          slot.textContent = assembledLetters[i];
+        } else {
+          slot.textContent = '';
+        }
+        wordSlotsContainer.appendChild(slot);
+      }
+    }
+
+    function renderLettersGrid() {
+      lettersGrid.innerHTML = '';
+
+      let allTiles = [...currentLevelData.letters];
+      while(allTiles.length < 10) {
+        const randChar = EXTRA_LETTERS[Math.floor(Math.random() * EXTRA_LETTERS.length)];
+        allTiles.push(randChar);
+      }
+
+      allTiles.sort(() => Math.random() - 0.5);
+
+      allTiles.forEach((char) => {
+        const btn = document.createElement('button');
+        btn.className = 'letter-btn';
+        btn.textContent = char;
+
+        btn.addEventListener('click', () => handleLetterClick(btn, char));
+        lettersGrid.appendChild(btn);
+      });
+    }
+
+    function handleLetterClick(btn, char) {
+      const nextIndex = assembledLetters.length;
+      const expectedChar = currentLevelData.letters[nextIndex];
+
+      if(char === expectedChar) {
+        playSound(500 + nextIndex * 120, 'sine');
+        assembledLetters.push(char);
+        btn.classList.add('disabled');
+
+        renderWordSlots();
+
+        if(assembledLetters.length === currentLevelData.letters.length) {
+          completeWordSuccess();
+        }
+      } else {
+        playSound(160, 'sawtooth');
+        btn.classList.add('wrong');
+        setTimeout(() => btn.classList.remove('wrong'), 400);
+      }
+    }
+
+    function resetCurrentWord() {
+      assembledLetters = [];
+      renderWordSlots();
+      document.querySelectorAll('.letter-btn').forEach(btn => btn.classList.remove('disabled'));
+      playSound(300, 'triangle');
+    }
+
+    function completeWordSuccess() {
+      clearInterval(timerInterval);
+
+      squareFrame.classList.add('completed');
+      placeholderHint.style.display = 'none';
+
+      playSound(900, 'square', 0.4);
+
+      const timeBonus = Math.floor(timeLeft) * 10;
+      score += 100 + timeBonus;
+      scoreEl.textContent = score;
+
+      setTimeout(() => {
+        endGame(true);
+      }, 1200);
+    }
+
+    function endGame(isWin) {
+      clearInterval(timerInterval);
+
+      const resultTitle = document.getElementById('result-title');
+      const resultDesc = document.getElementById('result-desc');
+
+      if(isWin) {
+        resultTitle.textContent = `🎉 اكتملت كلمة (${currentLevelData.word})!`;
+        resultTitle.style.color = 'var(--neon-green)';
+        resultDesc.textContent = `أحسنت! مجموع نقاطك: ${score}`;
+      } else {
+        resultTitle.textContent = '⏳ انتهى الوقت!';
+        resultTitle.style.color = 'var(--neon-pink)';
+        resultDesc.textContent = `انتهت الـ 25 ثانية. مجموع نقاطك: ${score}`;
+      }
+
+      resultModal.classList.remove('hidden');
+    }
+
+    function nextLevel() {
+      resultModal.classList.add('hidden');
+      currentLevel = (currentLevel % 1000) + 1;
+      loadLevel(currentLevel);
+    }
+  </script>
+</body>
+</html>
